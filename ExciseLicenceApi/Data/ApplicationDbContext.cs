@@ -1,18 +1,16 @@
-﻿using System.Collections.Generic;
-using ExciseLicenceApi.Models;
+﻿using ExciseLicenceApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExciseLicenceApi.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        // The constructor passes connection settings down to EF Core
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // This property represents your database table
-        public DbSet<BarFirstRegistration> BarFirstRegistrations { get; set; }
+        // Expose the Challan collection (Only thing added here!)
+        public DbSet<ChallanCheck> ChallanChecks { get; set; }
     }
 }

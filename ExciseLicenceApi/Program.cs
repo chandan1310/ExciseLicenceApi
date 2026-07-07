@@ -2,34 +2,40 @@ using Microsoft.EntityFrameworkCore;
 using ExciseLicenceApi.Data;
 using Scalar.AspNetCore;
 
+// Add this line to resolve the AddSwaggerGen and UseSwagger errors
+using Microsoft.Extensions.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Register your Database Context using the connection string from appsettings.json
+// Force Kestrel to use fresh, unblocked ports
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8081); // HTTP
+    options.ListenAnyIP(8082, listenOptions => listenOptions.UseHttps());
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlServrConnStrng")));
 
-// 2. Add Controller support so your LicenceApplicationsController is recognized
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// 3. Add native OpenAPI support
+// Register BOTH OpenAPI and Swagger generation support
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(); // <-- Should resolve now
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Generates the raw openapi/v1.json file
     app.MapOpenApi();
-
-    // Turns on the visual UI dashboard at /scalar/v1
     app.MapScalarApiReference();
+
+    // Enable classic Swagger UI middleware
+    app.UseSwagger();   // <-- Should resolve now
+    app.UseSwaggerUI();  // <-- Should resolve now
 }
 
 app.UseHttpsRedirection();
-
-// 4. Map your attribute-routed controllers (like api/LicenceApplications)
 app.MapControllers();
-
 app.Run();

@@ -2,35 +2,35 @@
 using Microsoft.EntityFrameworkCore;
 using ExciseLicenceApi.Data;
 using ExciseLicenceApi.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace ExciseLicenceApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class LicenceApplicationsController : ControllerBase
+    public class ChallanCheckController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        // EF Core context is injected automatically here
-        public LicenceApplicationsController(ApplicationDbContext context)
+        public ChallanCheckController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/LicenceApplications?financialYear=2026-2027
+        // GET: api/ChallanCheck
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BarFirstRegistration>>> GetByFinancialYear([FromQuery] string financialYear = "2026-2027")
+        public async Task<ActionResult<IEnumerable<ChallanCheck>>> GetChallans([FromQuery] string challanNo = null)
         {
-            if (string.IsNullOrEmpty(financialYear))
+            IQueryable<ChallanCheck> query = _context.ChallanChecks;
+
+            if (!string.IsNullOrEmpty(challanNo))
             {
-                return BadRequest("Financial year is required.");
+                query = query.Where(c => c.ChallanNo == challanNo);
             }
 
-
-            var results = await _context.BarFirstRegistrations
-                .Where(b => b.FinancialYear == financialYear)
-                .ToListAsync();
-
+            var results = await query.ToListAsync();
             return Ok(results);
         }
     }
